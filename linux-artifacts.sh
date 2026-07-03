@@ -34,7 +34,9 @@ echo
 section "Службы (systemctl)"
 printf "  %-28s %s\n" "systemd-journald" "$(svc systemd-journald.service)"
 printf "  %-28s %s\n" "systemd-logind" "$(svc systemd-logind.service)"
-printf "  %-28s %s\n" "rsyslog / syslog" "$(svc rsyslog.service 2>/dev/null; svc syslog.service 2>/dev/null | head -1)"
+rsys=$(svc rsyslog.service)
+[[ "$rsys" == "нет" ]] && rsys=$(svc syslog.service)
+printf "  %-28s %s\n" "rsyslog / syslog" "$rsys"
 printf "  %-28s %s\n" "auditd" "$(svc auditd.service)"
 printf "  %-28s %s\n" "systemd-coredump" "$(svc systemd-coredump.socket; svc systemd-coredump@.service 2>/dev/null | head -1)"
 printf "  %-28s %s\n" "apport" "$(svc apport.service)"
