@@ -25,6 +25,12 @@ bash -c "$(curl -fsSL $BASE/browser-history.sh)"
 # AllDownloads (все скачивания)
 bash -c "$(curl -fsSL $BASE/all-downloads.sh)"
 
+# Linux Artifacts (EventLog/BAM/DPS аналог)
+bash -c "$(curl -fsSL $BASE/linux-artifacts.sh)"
+
+# SafeMod — сессии MC (старт/стоп)
+bash -c "$(curl -fsSL $BASE/safe-mod-detector.sh)"
+
 # System info
 bash -c "$(curl -fsSL $BASE/sysinfo.sh)"
 
@@ -44,7 +50,9 @@ curl -fsSL $BASE/run.sh | bash -s -- downloads
 | `jni-check.sh` | Ghost jar + .so кратко |
 | `browser-history.sh` | URL/IP читов в браузере |
 | `all-downloads.sh` | Таблица всех скачиваний |
+| `linux-artifacts.sh` | journalctl / BAM / DPS (аналог Windows) |
+| `safe-mod-detector.sh` | Сессии MC: старт, стоп, перерывы |
 | `sysinfo.sh` | Дистрибутив, VM, дата установки |
 | `common-dirs-scan.sh` | Jar в типичных папках |
 | `memory-search.sh` | gcore/strings обёртка |
-| `run.sh` | `mods\|doomsday\|jni\|inj\|browser\|downloads\|sys\|scan` |
+| `run.sh` | `mods\|doomsday\|jni\|inj\|browser\|downloads\|artifacts\|safemod\|sys\|scan` |
