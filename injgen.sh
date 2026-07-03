@@ -271,6 +271,7 @@ run_auto() {
   [[ -z "$PID" ]] && { echo "Minecraft Java not detected."; exit 1; }
   injgen_scan "$PID"
   injgen_print "$PID"
+  printf '%b\n' "$LAST"
   exit $?
 }
 
