@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Запуск на ПК подозреваемого — только через curl.
-# mods | doomsday | jni [PID] | scan
+# mods | doomsday | jni | inj | browser | downloads | scan
 
 set -euo pipefail
 
@@ -20,8 +20,10 @@ case "${1:-}" in
   mem|memory|gcore|strings)  run memory-search.sh "${@:2}" ;;
   inj|injgen)                run injgen-linux.sh "${@:2}" ;;
   sys|sysinfo|host)          run sysinfo.sh "${@:2}" ;;
+  browser|history|bh)        run browser-history.sh "${@:2}" ;;
+  downloads|alldownloads|ad) run all-downloads.sh "${@:2}" ;;
   *)
-    echo "Использование: curl -fsSL URL/run.sh | bash -s -- {mods|doomsday|jni|inj|sys|scan} [PID]"
+    echo "Использование: curl -fsSL URL/run.sh | bash -s -- {mods|doomsday|jni|inj|browser|downloads|sys|scan} [PID|limit]"
     exit 1
     ;;
 esac
