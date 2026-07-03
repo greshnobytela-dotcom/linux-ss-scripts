@@ -26,8 +26,14 @@ install_date=""
 install_src=""
 
 if [[ -f /var/log/installer/syslog ]]; then
-  install_date=$(grep -m1 ' finish' /var/log/installer/syslog 2>/dev/null | awk '{print $1,$2,$3}' || true)
-  [[ -n "$install_date" ]] && install_src="Ubuntu/Debian installer log"
+  install_date=$(grep -iE 'finish-install|finished installation|installation finished' /var/log/installer/syslog 2>/dev/null \
+    | tail -1 | awk '{print $1,$2,$3}' || true)
+  [[ -n "$install_date" ]] && install_src="installer log"
+fi
+
+if [[ -z "$install_date" && -f /etc/machine-id ]]; then
+  install_date=$(stat -c %y /etc/machine-id 2>/dev/null | cut -d. -f1 || true)
+  [[ -n "$install_date" ]] && install_src="/etc/machine-id (приблизительно)"
 fi
 
 if [[ -z "$install_date" && -f /etc/fedora-release ]]; then
@@ -68,12 +74,14 @@ echo "Uptime:       $(uptime -p 2>/dev/null || uptime)"
 echo
 
 # --- Виртуальная машина ---
-virt="unknown"
+virt="bare metal"
 virt_detail=""
 
 if command -v systemd-detect-virt >/dev/null 2>&1; then
-  v=$(systemd-detect-virt 2>/dev/null || echo "none")
-  [[ "$v" == "none" ]] && virt="bare metal / container none" || virt="VM ($v)"
+  v=$(systemd-detect-virt 2>/dev/null | head -1 | tr -d '[:space:]')
+  if [[ -n "$v" && "$v" != "none" ]]; then
+    virt="VM ($v)"
+  fi
 fi
 
 read_dmi() {
@@ -87,18 +95,20 @@ board=$(read_dmi /sys/class/dmi/id/board_name)
 
 if [[ -n "$vendor" || -n "$product" ]]; then
   virt_detail="${vendor:-?} / ${product:-?}"
-  case "${vendor}${product}${board}" in
-    *[Vv][Mm]ware*|*VMware*)          virt="VM (VMware)" ;;
-    *VirtualBox*|*innotek*)           virt="VM (VirtualBox)" ;;
-    *QEMU*|*KVM*|*Bochs*)             virt="VM (QEMU/KVM)" ;;
-    *Microsoft*Virtual*|*Hyper-V*)   virt="VM (Hyper-V)" ;;
-    *Xen*)                            virt="VM (Xen)" ;;
-    *Parallels*)                       virt="VM (Parallels)" ;;
-  esac
+  if [[ "$virt" == "bare metal" ]]; then
+    case "${vendor}${product}${board}" in
+      *[Vv][Mm]ware*|*VMware*)          virt="VM (VMware)" ;;
+      *VirtualBox*|*innotek*)           virt="VM (VirtualBox)" ;;
+      *QEMU*|*KVM*|*Bochs*|*Standard PC*) virt="VM (QEMU/KVM)" ;;
+      *Microsoft*Virtual*|*Hyper-V*)   virt="VM (Hyper-V)" ;;
+      *Xen*)                            virt="VM (Xen)" ;;
+      *Parallels*)                       virt="VM (Parallels)" ;;
+    esac
+  fi
 fi
 
-if grep -qi hypervisor /proc/cpuinfo 2>/dev/null; then
-  [[ "$virt" == "unknown" || "$virt" == *bare* ]] && virt="VM (hypervisor в cpuinfo)"
+if [[ "$virt" == "bare metal" ]] && grep -qi '^flags.*hypervisor' /proc/cpuinfo 2>/dev/null; then
+  virt="VM (hypervisor в cpuinfo)"
 fi
 
 if [[ -d /proc/vz ]] || grep -q 'container=lxc' /proc/1/environ 2>/dev/null; then
@@ -114,7 +124,7 @@ if echo "$virt" | grep -qi '^VM'; then
   echo
   echo "[?] Виртуальная машина — не бан сам по себе."
   echo "    Свежая VM + чистая history = копать глубже."
-elif echo "$virt" | grep -qi 'bare metal'; then
+elif [[ "$virt" == "bare metal" ]]; then
   echo
   echo "[OK] Похоже на физический ПК (не VM)."
 else
