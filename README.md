@@ -5,7 +5,7 @@ Bash-скрипты для PC Check Minecraft на Linux. Запуск на ПК
 ## Команды
 
 ```bash
-BASE=https://raw.githubusercontent.com/greshnobytela-dotcom/linux-ss-scripts/main
+BASE=https://cdn.jsdelivr.net/gh/greshnobytela-dotcom/linux-ss-scripts@main
 
 # Mods
 bash -c "$(curl -fsSL $BASE/mod-analyzer.sh)"
