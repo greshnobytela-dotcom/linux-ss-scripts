@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # SS Bypass — Chameleon / Faker / Silent / второй ПК (Synergy, Parsec, v4l2loopback)
-# AnyDesk/RustDesk при SS — НОРМА (модер подключается к ПК игрока). Не баним.
+# v2 — AnyDesk = INFO (не detect). CDN: jsdelivr (raw/main кэширует старое).
 
 set -uo pipefail
 
