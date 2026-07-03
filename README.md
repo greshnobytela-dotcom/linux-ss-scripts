@@ -25,9 +25,6 @@ bash -c "$(curl -fsSL $BASE/browser-history.sh)"
 # AllDownloads (все скачивания)
 bash -c "$(curl -fsSL $BASE/all-downloads.sh)"
 
-# Linux Services — journald, syslog, auditd, logind, coredump, apport, cron
-bash -c "$(curl -fsSL $BASE/linux-artifacts.sh)"
-
 # SafeMod — сессии MC (старт/стоп)
 bash -c "$(curl -fsSL $BASE/safe-mod-detector.sh)"
 
@@ -57,7 +54,6 @@ curl -fsSL $BASE/run.sh | bash -s -- ss
 | `jni-check.sh` | Ghost jar + .so кратко |
 | `browser-history.sh` | URL/IP читов в браузере |
 | `all-downloads.sh` | Таблица всех скачиваний |
-| `linux-artifacts.sh` | Службы Linux: journald, syslog, auditd, logind, cron |
 | `safe-mod-detector.sh` | Сессии MC: старт, стоп, статус |
 | `cleaning-detector.sh` | Что чистили — ломает другие скрипты |
 | `ss-bypass-detector.sh` | Chameleon/Faker/Silent, 2-й ПК (Barrier/Parsec). AnyDesk = норма |
