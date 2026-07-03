@@ -34,6 +34,9 @@ bash -c "$(curl -fsSL $BASE/cleaning-detector.sh)"
 # SS Bypass — Chameleon / .faker / второй ПК (AnyDesk, Synergy, Parsec)
 bash -c "$(curl -fsSL $BASE/ss-bypass-detector.sh)"
 
+# MC Manual Check — мануал шаги 1–8 (Linux)
+bash -c "$(curl -fsSL $BASE/mc-manual-check.sh)"
+
 # FilesChecker — logs, settings/user, IAS, RU/EU читы в логах
 bash -c "$(curl -fsSL $BASE/files-checker.sh)"
 
@@ -54,6 +57,7 @@ curl -fsSL $BASE/run.sh | bash -s -- files
 | Скрипт | Назначение |
 |:--|:--|
 | `mod-analyzer.sh` | Modrinth + cheat strings в mods |
+| `mc-manual-check.sh` | Мануал SS 1–8: screenshots, versions, mods, Trash |
 | `doomsday-detector.sh` | Следы Doomsday |
 | `injgen-linux.sh` | JNI/javaagent inject (как InjGen) |
 | `jni-check.sh` | Ghost jar + .so кратко |
