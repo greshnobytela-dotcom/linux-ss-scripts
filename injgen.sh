@@ -55,7 +55,7 @@ draw() {
   echo "╚══════════════════════════════════════════════════════════════╝"
   if [[ -n "$LAST" ]]; then
     echo
-    echo "$LAST"
+    printf '%b\n' "$LAST"
     echo
   fi
 }
@@ -82,7 +82,7 @@ scan_light() {
     LAST="$out"; return 2
   fi
 
-  hits=$(tr '\0' '\n' < "/proc/$PID/environ" 2>/dev/null | grep "${g[@]}" -- "$STRING" || true)
+  hits=$(tr '\0' '\n' < "/proc/$PID/environ" 2>/dev/null | grep "${g[@]}" -- "$STRING" 2>/dev/null || true)
   if [[ -n "$hits" ]]; then
     out+="[!!] HIT environ:\n$(echo "$hits" | sed 's/^/    /')\n"
     out+=">>> ВЕРДИКТ: БАН <<<\n"
