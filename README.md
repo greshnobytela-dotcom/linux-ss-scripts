@@ -34,6 +34,9 @@ bash -c "$(curl -fsSL $BASE/safe-mod-detector.sh)"
 # Cleaning Detector — следы очистки улик
 bash -c "$(curl -fsSL $BASE/cleaning-detector.sh)"
 
+# SS Bypass — Chameleon / .faker / второй ПК (AnyDesk, Synergy, Parsec)
+bash -c "$(curl -fsSL $BASE/ss-bypass-detector.sh)"
+
 # System info
 bash -c "$(curl -fsSL $BASE/sysinfo.sh)"
 
@@ -41,6 +44,7 @@ bash -c "$(curl -fsSL $BASE/sysinfo.sh)"
 curl -fsSL $BASE/run.sh | bash -s -- mods
 curl -fsSL $BASE/run.sh | bash -s -- browser
 curl -fsSL $BASE/run.sh | bash -s -- downloads
+curl -fsSL $BASE/run.sh | bash -s -- ss
 ```
 
 ## Файлы
@@ -56,7 +60,8 @@ curl -fsSL $BASE/run.sh | bash -s -- downloads
 | `linux-artifacts.sh` | Службы Linux: journald, syslog, auditd, logind, cron |
 | `safe-mod-detector.sh` | Сессии MC: старт, стоп, статус |
 | `cleaning-detector.sh` | Что чистили — ломает другие скрипты |
+| `ss-bypass-detector.sh` | Chameleon, .faker, второй ПК (AnyDesk/Synergy/Parsec) |
 | `sysinfo.sh` | Дистрибутив, VM, дата установки |
 | `common-dirs-scan.sh` | Jar в типичных папках |
 | `memory-search.sh` | gcore/strings обёртка |
-| `run.sh` | `mods\|…\|clean\|sys\|scan` |
+| `run.sh` | `mods\|…\|clean\|ss\|sys\|scan` |
