@@ -7,7 +7,7 @@ PRESET='doomsday|meteor|killaura|liquidbounce|wurst|vape|novoline|rise|exhibitio
 
 pid=""
 query=""
-mode="light"   # light | deep | menu
+mode="menu"
 case_sensitive=0
 whole_word=0
 use_regex=1
@@ -19,14 +19,14 @@ find_pid() {
 
 usage() {
   cat <<'EOF'
-memory-search.sh — поиск строк читов (шаг 6 протокола)
+memory-search.sh — шаг 6
 
-  bash memory-search.sh              меню
-  bash memory-search.sh --quick      быстро, БЕЗ gcore (рекомендуется)
-  bash memory-search.sh --deep       gcore + RAM (sudo, звук может пискнуть)
-  bash memory-search.sh 249931 --quick
+  --quick     быстро, без gcore (рекомендуется)
+  --deep      gcore + RAM (sudo, звук может пискнуть)
+  (без флагов) меню
 
-  -s TEXT   своя строка    -c case   -w whole word   -r regex
+  bash memory-search.sh --quick
+  bash memory-search.sh 249931 --deep
 EOF
 }
 
@@ -35,11 +35,9 @@ while [[ $# -gt 0 ]]; do
     -h|--help) usage; exit 0 ;;
     --quick|-q) mode="light"; use_preset=1; query="$PRESET"; shift ;;
     --deep|-d) mode="deep"; use_preset=1; query="$PRESET"; shift ;;
-    --menu|-m) mode="menu"; shift ;;
     -c|--case) case_sensitive=1; shift ;;
     -w|--whole) whole_word=1; shift ;;
     -r|--regex) use_regex=1; shift ;;
-    -p|--preset) use_preset=1; query="$PRESET"; shift ;;
     -s|--string) query="${2:?нужен текст}"; use_preset=0; use_regex=0; shift 2 ;;
     [0-9]*) pid="$1"; shift ;;
     *) echo "[!] неизвестно: $1"; usage; exit 1 ;;
@@ -49,64 +47,80 @@ done
 [[ -z "$pid" ]] && pid=$(find_pid || true)
 [[ -z "$pid" ]] && { echo "[!] PID не найден. Запусти MC."; exit 1; }
 
-grep_hits() {
-  local pattern="$1"
-  local args=()
-  [[ $case_sensitive -eq 0 ]] && args+=(-i)
-  [[ $whole_word -eq 1 ]] && args+=(-w)
-  if [[ $use_regex -eq 1 ]]; then args+=(-E); else args+=(-F); fi
-  grep "${args[@]}" -- "$pattern" 2>/dev/null || true
+grep_opts() {
+  local -n out=$1
+  [[ $case_sensitive -eq 0 ]] && out+=(-i)
+  [[ $whole_word -eq 1 ]] && out+=(-w)
+  [[ $use_regex -eq 1 ]] && out+=(-E) || out+=(-F)
 }
 
-collect_light() {
-  {
-    tr '\0' '\n' < "/proc/$pid/cmdline" 2>/dev/null
-    tr '\0' '\n' < "/proc/$pid/environ" 2>/dev/null
-    awk '{print $6}' "/proc/$pid/maps" 2>/dev/null | grep -E '^/' | sort -u | while read -r f; do
-      [[ -r "$f" ]] && strings "$f" 2>/dev/null
-    done
-    for fd in "/proc/$pid/fd/"*; do
-      [[ -e "$fd" ]] || continue
-      t=$(readlink "$fd" 2>/dev/null || true)
-      [[ -n "$t" && -r "$t" && "$t" == /* ]] && strings "$t" 2>/dev/null
-    done
-  } 2>/dev/null
+resolve_pattern() {
+  if [[ $use_preset -eq 1 ]]; then echo "$PRESET"; else echo "$query"; fi
 }
 
 run_light() {
   local pattern="$1"
+  local g=() hits="" line src
+  grep_opts g
+
   echo "=== Memory Search (light) PID $pid ==="
-  echo "Источник: cmdline, maps, открытые файлы — без gcore, без лагов"
+  echo "cmdline + подозрительные файлы — без gcore"
   echo "Pattern: $pattern"
   echo "---"
 
-  local hits
-  hits=$(collect_light | grep_hits "$pattern" | sort -u | head -30)
-
+  hits=$(tr '\0' '\n' < "/proc/$pid/cmdline" 2>/dev/null | grep "${g[@]}" -- "$pattern" || true)
   if [[ -n "$hits" ]]; then
-    echo "[!!] НАЙДЕНО:"
-    echo "$hits" | sed 's/^/    /'
-    echo
-    echo "=== ВЕРДИКТ: БАН / подозрение ==="
-    return 2
+    echo "[!!] cmdline:"; echo "$hits" | sed 's/^/    /'
+    echo "=== ВЕРДИКТ: БАН ==="; return 2
   fi
 
-  echo "[OK] в загруженных файлах и cmdline — чисто"
+  hits=$(tr '\0' '\n' < "/proc/$pid/environ" 2>/dev/null | grep "${g[@]}" -- "$pattern" || true)
+  if [[ -n "$hits" ]]; then
+    echo "[!!] environ:"; echo "$hits" | sed 's/^/    /'
+    echo "=== ВЕРДИКТ: БАН ==="; return 2
+  fi
+
+  while IFS= read -r src; do
+    [[ -z "$src" || ! -r "$src" ]] && continue
+    line=$(grep -a -m1 "${g[@]}" -- "$pattern" "$src" 2>/dev/null || true)
+    if [[ -n "$line" ]]; then
+      echo "[!!] $src"
+      echo "    $line"
+      echo "=== ВЕРДИКТ: БАН ==="
+      return 2
+    fi
+  done < <(
+    awk '{print $6}' "/proc/$pid/maps" 2>/dev/null | sort -u \
+      | grep -E '^/' \
+      | grep -iE '/tmp/|/dev/shm/|\.cache/|cheat|doomsday|/Downloads/|/Загрузки/' \
+      | grep -ivE '/\.minecraft/libraries/|/java-runtime-delta/' || true
+  )
+
+  while IFS= read -r t; do
+    [[ -z "$t" || ! -r "$t" ]] && continue
+    [[ "$t" =~ /tmp/|\.cache/|cheat|doomsday ]] || continue
+    line=$(grep -a -m1 "${g[@]}" -- "$pattern" "$t" 2>/dev/null || true)
+    if [[ -n "$line" ]]; then
+      echo "[!!] fd → $t"
+      echo "    $line"
+      echo "=== ВЕРДИКТ: БАН ==="
+      return 2
+    fi
+  done < <(ls -l "/proc/$pid/fd/" 2>/dev/null | awk '{print $NF}' | grep -E '^/' || true)
+
+  echo "[OK] чисто"
   echo "=== ВЕРДИКТ: чисто (light) ==="
-  echo "    ghost-чит только в heap? → bash ... --deep  (gcore, sudo, звук может пискнуть)"
+  echo "    heap-only ghost? → --deep (gcore, sudo)"
   return 0
 }
 
 run_deep() {
   local pattern="$1"
-  local core="core.$pid"
-  local grep_args=()
-  [[ $case_sensitive -eq 0 ]] && grep_args+=(-i)
-  [[ $whole_word -eq 1 ]] && grep_args+=(-w)
-  [[ $use_regex -eq 1 ]] && grep_args+=(-E) || grep_args+=(-F)
+  local core="core.$pid" g=() hits=""
+  grep_opts g
 
-  echo "=== Memory Search (deep / gcore) PID $pid ==="
-  echo "[!] Игра зависнет ~1 сек. На Linux звук может пискнуть — норма."
+  echo "=== Memory Search (deep) PID $pid ==="
+  echo "[!] gcore: зависание ~1 сек, звук может пискнуть"
   echo "---"
 
   if ! sudo gcore "$pid" 2>/dev/null; then
@@ -114,13 +128,11 @@ run_deep() {
     return 1
   fi
 
-  local hits
-  hits=$(strings "$core" 2>/dev/null | grep "${grep_args[@]}" -- "$pattern" | sort -u | head -30 || true)
+  hits=$(strings "$core" 2>/dev/null | grep "${g[@]}" -- "$pattern" | sort -u | head -20 || true)
   rm -f core.* 2>/dev/null || true
 
   if [[ -n "$hits" ]]; then
-    echo "[!!] НАЙДЕНО в RAM:"
-    echo "$hits" | sed 's/^/    /'
+    echo "[!!] RAM:"; echo "$hits" | sed 's/^/    /'
     echo "=== ВЕРДИКТ: БАН ==="
     return 2
   fi
@@ -131,7 +143,8 @@ run_deep() {
 }
 
 draw_box() {
-  local qshow="${query:-$PRESET}"
+  local qshow
+  qshow=$(resolve_pattern)
   [[ ${#qshow} -gt 38 ]] && qshow="${qshow:0:35}..."
 
   clear 2>/dev/null || true
@@ -139,44 +152,18 @@ draw_box() {
   printf "║  %-56s ║\n" "Memory String Search"
   echo "╠══════════════════════════════════════════════════════════╣"
   printf "║  String: %-47s ║\n" "$qshow"
-  printf "║  [%s] Case sensitive   [%s] Whole word   [%s] Regex   ║\n" \
-    "$([[ $case_sensitive -eq 1 ]] && echo x || echo ' ')" \
-    "$([[ $whole_word -eq 1 ]] && echo x || echo ' ')" \
-    "$([[ $use_regex -eq 1 ]] && echo x || echo ' ')"
   printf "║  PID: %-49s ║\n" "$pid"
-  echo "╠══════════════════════════════════════════════════════════╣"
-  echo "║  1 Case  2 Whole  3 Regex  4 String  5 PID             ║"
-  echo "║  0 Light search (без gcore)   9 Deep (gcore + sudo)    ║"
-  echo "║  q Quit                                                  ║"
+  echo "║  0 Light (без gcore)    9 Deep (gcore)    q Quit       ║"
   echo "╚══════════════════════════════════════════════════════════╝"
 }
 
-resolve_pattern() {
-  if [[ $use_preset -eq 1 ]]; then echo "$PRESET"; else echo "$query"; fi
-}
+[[ "$mode" == "light" ]] && { run_light "$(resolve_pattern)"; exit $?; }
+[[ "$mode" == "deep" ]] && { run_deep "$(resolve_pattern)"; exit $?; }
 
-# --- запуск ---
-if [[ "$mode" == "light" ]]; then
-  run_light "$(resolve_pattern)"
-  exit $?
-fi
-
-if [[ "$mode" == "deep" ]]; then
-  run_deep "$(resolve_pattern)"
-  exit $?
-fi
-
-# меню
-query="${query:-$PRESET}"
 while true; do
   draw_box
   read -r -p "  > " choice || exit 0
   case "$choice" in
-    1) case_sensitive=$((1 - case_sensitive)) ;;
-    2) whole_word=$((1 - whole_word)) ;;
-    3) use_regex=$((1 - use_regex)) ;;
-    4) read -r -p "  Enter string: " query; use_preset=0 ;;
-    5) read -r -p "  PID: " pid; [[ -z "$pid" ]] && pid=$(find_pid || true) ;;
     0) run_light "$(resolve_pattern)"; read -r -p "  Enter..." _ ;;
     9) run_deep "$(resolve_pattern)"; read -r -p "  Enter..." _ ;;
     q|Q) exit 0 ;;
