@@ -15,7 +15,7 @@ add_warn() { WARN+=("$1"); }
 section() { echo; echo "━━ $1 ━━"; }
 
 echo "=== Cleaning Detector — следы очистки улик ==="
-echo "Показывает что могло сломать browser-history, all-downloads, safe-mod, linux-artifacts…"
+echo "Показывает что могло сломать browser-history, all-downloads, safe-mod…"
 echo
 
 # ─────────────────────────────────────────────
@@ -27,7 +27,7 @@ for f in "$HOME/.bash_history" "$HOME/.zsh_history"; do
   size=$(stat -c %s "$f" 2>/dev/null || echo 0)
   echo "  $f: $lines строк, ${size} байт"
   if [[ "$lines" -lt 5 && "$size" -lt 200 ]]; then
-    add_detect "$f почти пуст ($lines строк) → linux-artifacts, all-downloads (wget/curl), doomsday"
+    add_detect "$f почти пуст ($lines строк) → all-downloads (wget/curl), doomsday, journal"
   fi
   if grep -qE 'history -c|history -w|> *\.bash_history|> *\.zsh_history|unset HISTFILE|HISTSIZE=0|HISTFILESIZE=0' "$f" 2>/dev/null; then
     add_detect "В $f есть команды очистки history → все скрипты с history"
@@ -52,12 +52,12 @@ if command -v journalctl >/dev/null 2>&1; then
   boots=$(journalctl --list-boots 2>/dev/null | wc -l)
   usage=$(journalctl --disk-usage 2>/dev/null | grep -oE '[0-9.]+[MGK]' | head -1 || echo "?")
   echo "  boot-записей: $boots, размер: $usage"
-  [[ "${boots:-0}" -lt 2 ]] && add_detect "journal: мало boot ($boots) — могли journalctl --vacuum → linux-artifacts"
+  [[ "${boots:-0}" -lt 2 ]] && add_detect "journal: мало boot ($boots) — могли journalctl --vacuum"
   vac=$(journalctl --since "90 days ago" 2>/dev/null \
     | grep -iE 'journalctl.*vacuum|Deleted archived journal|Vacuuming done|freed.*archive' | tail -3 || true)
   if [[ -n "$vac" ]]; then
     echo "$vac" | sed 's/^/    /'
-    add_detect "journal: очистка vacuum/flush → linux-artifacts"
+    add_detect "journal: очистка vacuum/flush"
   fi
   oldest=$(journalctl --reverse --no-pager -n 1 --output=short-iso 2>/dev/null | tail -1 | cut -d' ' -f1 || true)
   echo "  самая старая запись (хвост reverse): $oldest"
@@ -160,9 +160,9 @@ section "6 · GTK recently-used"
 # ─────────────────────────────────────────────
 XBEL="$HOME/.local/share/recently-used.xbel"
 if [[ ! -f "$XBEL" ]]; then
-  add_warn "recently-used.xbel отсутствует → linux-artifacts (BAM-подобное)"
+  add_warn "recently-used.xbel отсутствует"
 elif [[ $(stat -c %s "$XBEL" 2>/dev/null || echo 0) -lt 500 ]]; then
-  add_detect "recently-used.xbel почти пуст → linux-artifacts"
+  add_detect "recently-used.xbel почти пуст"
 else
   echo "  recently-used.xbel: $(stat -c %s "$XBEL") байт, $(grep -c bookmark "$XBEL" 2>/dev/null || echo 0) записей"
 fi
