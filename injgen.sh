@@ -25,15 +25,16 @@ LAST=""
 DETECTS=()
 
 find_pid() {
-  ps aux | grep '[j]ava' | grep KnotClient | sort -k6 -rn | awk '{print $2}' | head -1
+  local p
+  p=$(ps aux | grep '[j]ava' | grep KnotClient | sort -k6 -rn | awk '{print $2}' | head -1)
+  [[ -n "$p" ]] && { echo "$p"; return; }
+  p=$(ps aux | grep '[j]ava' | grep 'net.minecraft.client.main.Main' | grep -v bootstrap | sort -k6 -rn | awk '{print $2}' | head -1)
+  [[ -n "$p" ]] && { echo "$p"; return; }
+  ps aux | grep '[j]ava' | grep '\.minecraft' | grep -v bootstrap | sort -k6 -rn | awk '{print $2}' | head -1
 }
 
-proc_label() {
-  local c
-  c=$(tr '\0' ' ' < "/proc/$1/cmdline" 2>/dev/null || true)
-  echo "$c" | grep -q KnotClient && echo "KnotClient" && return
-  echo "java"
-}
+# Linux = java (Windows InjGen = javaw.exe). KnotClient — только внутри cmdline Fabric.
+proc_label() { echo "java"; }
 
 add_hit() { DETECTS+=("$1"); }
 
@@ -167,7 +168,7 @@ draw() {
   echo "╔══════════════════════════════════════════════════════════════╗"
   echo "║  INJGEN Linux — String Scanner                               ║"
   echo "╠══════════════════════════════════════════════════════════════╣"
-  printf "║  Process: %-8s  %-44s ║\n" "${PID:-?}" "$(proc_label "${PID:-0}" 2>/dev/null || echo java)"
+  printf "║  Process: %-8s  java (Linux ≈ javaw.exe на Windows)         ║\n" "${PID:-?}"
   echo "╠══════════════════════════════════════════════════════════════╣"
   printf "║  Enter string: %-45s ║\n" "$disp"
   printf "║  [%s] Case sensitive    [%s] Match whole word              ║\n" \
@@ -208,8 +209,8 @@ pick_pid() {
   ps aux | grep '[j]ava' | grep -v cursor | while read -r line; do
     id=$(echo "$line" | awk '{print $2}')
     ram=$(echo "$line" | awk '{print $4}')
-    if echo "$line" | grep -q KnotClient; then
-      echo "  >>> $id  RAM=${ram}%  ИГРА"
+    if echo "$line" | grep -qE 'KnotClient|net\.minecraft\.client\.main\.Main'; then
+      echo "  >>> $id  RAM=${ram}%  ИГРА (java)"
     else
       echo "      $id  RAM=${ram}%"
     fi
