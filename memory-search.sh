@@ -57,11 +57,6 @@ done
 [[ -z "$pid" ]] && { echo "[!] PID не найден. Запусти MC или: memory-search.sh PID"; exit 1; }
 
 draw_box() {
-  local title="$1"
-  local cs=$([[ $case_sensitive -eq 1 ]] && echo ON || echo off)
-  local ww=$([[ $whole_word -eq 1 ]] && echo ON || echo off)
-  local rx=$([[ $use_regex -eq 1 ]] && echo ON || echo off)
-  local pr=$([[ $use_preset -eq 1 ]] && echo ON || echo off)
   local qshow="${query:-<пусто>}"
   [[ ${#qshow} -gt 36 ]] && qshow="${qshow:0:33}..."
 
