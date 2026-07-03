@@ -18,7 +18,7 @@ case "${1:-}" in
   jni|jni-check)             run jni-check.sh "${@:2}" ;;
   scan|common|common-dirs)   run common-dirs-scan.sh "${@:2}" ;;
   mem|memory|gcore|strings)  run memory-search.sh "${@:2}" ;;
-  inj|injgen)                run injgen.sh "${@:2}" ;;
+  inj|injgen)                run injgen-linux.sh "${@:2}" ;;
   sys|sysinfo|host)          run sysinfo.sh "${@:2}" ;;
   *)
     echo "Использование: curl -fsSL URL/run.sh | bash -s -- {mods|doomsday|jni|inj|sys|scan} [PID]"
