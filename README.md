@@ -60,7 +60,7 @@ curl -fsSL $BASE/run.sh | bash -s -- ss
 | `linux-artifacts.sh` | Службы Linux: journald, syslog, auditd, logind, cron |
 | `safe-mod-detector.sh` | Сессии MC: старт, стоп, статус |
 | `cleaning-detector.sh` | Что чистили — ломает другие скрипты |
-| `ss-bypass-detector.sh` | Chameleon, .faker, второй ПК (AnyDesk/Synergy/Parsec) |
+| `ss-bypass-detector.sh` | Chameleon/Faker/Silent, 2-й ПК (Barrier/Parsec). AnyDesk = норма |
 | `sysinfo.sh` | Дистрибутив, VM, дата установки |
 | `common-dirs-scan.sh` | Jar в типичных папках |
 | `memory-search.sh` | gcore/strings обёртка |
