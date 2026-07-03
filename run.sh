@@ -22,12 +22,11 @@ case "${1:-}" in
   sys|sysinfo|host)          run sysinfo.sh "${@:2}" ;;
   browser|history|bh)        run browser-history.sh "${@:2}" ;;
   downloads|alldownloads|ad) run all-downloads.sh "${@:2}" ;;
-  artifacts|forensics|bam|journal) run linux-artifacts.sh "${@:2}" ;;
   safemod|sessions|mc-sessions|safe) run safe-mod-detector.sh "${@:2}" ;;
   clean|cleaning|wipe)       run cleaning-detector.sh "${@:2}" ;;
   ss|bypass|dualpc|faker|chameleon) run ss-bypass-detector.sh "${@:2}" ;;
   *)
-    echo "Использование: curl -fsSL URL/run.sh | bash -s -- {mods|doomsday|jni|inj|browser|downloads|artifacts|safemod|clean|ss|sys|scan} [args]"
+    echo "Использование: curl -fsSL URL/run.sh | bash -s -- {mods|doomsday|jni|inj|browser|downloads|safemod|clean|ss|sys|scan} [args]"
     exit 1
     ;;
 esac
