@@ -31,6 +31,9 @@ bash -c "$(curl -fsSL $BASE/linux-artifacts.sh)"
 # SafeMod — сессии MC (старт/стоп)
 bash -c "$(curl -fsSL $BASE/safe-mod-detector.sh)"
 
+# Cleaning Detector — следы очистки улик
+bash -c "$(curl -fsSL $BASE/cleaning-detector.sh)"
+
 # System info
 bash -c "$(curl -fsSL $BASE/sysinfo.sh)"
 
@@ -52,7 +55,8 @@ curl -fsSL $BASE/run.sh | bash -s -- downloads
 | `all-downloads.sh` | Таблица всех скачиваний |
 | `linux-artifacts.sh` | Службы Linux: journald, syslog, auditd, logind, cron |
 | `safe-mod-detector.sh` | Сессии MC: старт, стоп, статус |
+| `cleaning-detector.sh` | Что чистили — ломает другие скрипты |
 | `sysinfo.sh` | Дистрибутив, VM, дата установки |
 | `common-dirs-scan.sh` | Jar в типичных папках |
 | `memory-search.sh` | gcore/strings обёртка |
-| `run.sh` | `mods\|doomsday\|jni\|inj\|browser\|downloads\|artifacts\|safemod\|sys\|scan` |
+| `run.sh` | `mods\|…\|clean\|sys\|scan` |
