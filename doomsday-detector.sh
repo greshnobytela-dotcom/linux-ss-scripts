@@ -8,6 +8,9 @@ echo
 
 found=0
 
+# IP чит-auth / CDN (Doomsday, Vape и др.)
+CHEAT_IP_RE='165\.22\.|167\.172\.|144\.217\.|45\.142\.|185\.234\.'
+
 report() {
   echo "[DETECT] $*"
   ((found++)) || true
@@ -93,6 +96,43 @@ while IFS= read -r f; do
   fi
 done < <(find "$HOME/.minecraft" "$HOME/Загрузки" "$HOME/Downloads" /tmp "$HOME/.cache" \
   -maxdepth 3 -type f ! -name '*.jar' -size +10k 2>/dev/null)
+
+echo "{ Сеть — IP чит-серверов (165.22 / 167.172 / …) }"
+if command -v ss >/dev/null 2>&1; then
+  out=$(ss -tuplna 2>/dev/null | grep -iE "$CHEAT_IP_RE" || true)
+  if [[ -n "$out" ]]; then
+    echo "[DETECT] ss -tuplna → чит-IP:"
+    echo "$out" | sed 's/^/    /'
+    ((found++)) || true
+  fi
+  out=$(ss -tn state established 2>/dev/null | grep -iE "$CHEAT_IP_RE" || true)
+  if [[ -n "$out" ]]; then
+    echo "[DETECT] ss ESTABLISHED → чит-IP:"
+    echo "$out" | sed 's/^/    /'
+    ((found++)) || true
+  fi
+  java_hit=$(ss -tuplna 2>/dev/null | grep '[j]ava' | grep -iE "$CHEAT_IP_RE" || true)
+  if [[ -n "$java_hit" ]]; then
+    echo "[DETECT] java → чит-сервер (Doomsday/Vape auth):"
+    echo "$java_hit" | sed 's/^/    /'
+    ((found++)) || true
+  fi
+elif command -v netstat >/dev/null 2>&1; then
+  out=$(netstat -tulpn 2>/dev/null | grep -iE "$CHEAT_IP_RE" || true)
+  if [[ -n "$out" ]]; then
+    echo "[DETECT] netstat → чит-IP:"
+    echo "$out" | sed 's/^/    /'
+    ((found++)) || true
+  fi
+  java_hit=$(netstat -tulpn 2>/dev/null | grep '[j]ava' | grep -iE "$CHEAT_IP_RE" || true)
+  if [[ -n "$java_hit" ]]; then
+    echo "[DETECT] netstat java → чит-сервер:"
+    echo "$java_hit" | sed 's/^/    /'
+    ((found++)) || true
+  fi
+else
+  echo "  ss/netstat не найдены — пропуск"
+fi
 
 echo
 if [[ $found -eq 0 ]]; then
