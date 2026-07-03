@@ -24,8 +24,9 @@ case "${1:-}" in
   downloads|alldownloads|ad) run all-downloads.sh "${@:2}" ;;
   artifacts|forensics|bam|journal) run linux-artifacts.sh "${@:2}" ;;
   safemod|sessions|mc-sessions|safe) run safe-mod-detector.sh "${@:2}" ;;
+  clean|cleaning|wipe)       run cleaning-detector.sh "${@:2}" ;;
   *)
-    echo "Использование: curl -fsSL URL/run.sh | bash -s -- {mods|doomsday|jni|inj|browser|downloads|artifacts|safemod|sys|scan} [args]"
+    echo "Использование: curl -fsSL URL/run.sh | bash -s -- {mods|doomsday|jni|inj|browser|downloads|artifacts|safemod|clean|sys|scan} [args]"
     exit 1
     ;;
 esac
