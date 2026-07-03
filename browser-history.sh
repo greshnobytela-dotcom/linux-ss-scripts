@@ -32,6 +32,7 @@ CLIENT_NAMES = (
     "fusion", "skid", "intent", "monot", "huzuni", "sigma5",
     "remix", "cortex", "slinky", "entrance", "nightmare",
     "nurik", "cataclysm", "wissend", "nuclear", "drogan", "spooky", "wildclient",
+    "chameleon", "faker", "silent", "coldbypass", "bypassing",
 )
 
 # ── Известные сайты-агрегаторы / магазины читов ──
@@ -44,6 +45,8 @@ CHEAT_SITES = (
     r"meteorclient\.com", r"liquidbounce\.net", r"wurstclient\.net",
     r"aristois\.net", r"riseclient\.com", r"novoline\.wtf", r"fdpinfo",
     r"cheat\.(ru|eu|fun|xyz)", r"chit\.(ru|eu|fun)", r"client\.(ru|eu)",
+    r"silent\.best", r"bypassing\.gg", r"chameleon", r"\.faker", r"faker\.",
+    r"ss.?bypass", r"bypass.?ss", r"clean.?pc", r"fake.?launcher",
     r"ghost\.(ru|eu|fun)", r"hack\.(ru|eu|fun)", r"\.su/",
     r"celka\.su", r"wexside\.(ru|eu|xyz|fun)", r"expensive.*\.(ru|eu|fun)",
     r"minced\.(ru|eu|fun)", r"delta.*client", r"masterminecraft",
@@ -100,7 +103,8 @@ CHEAT_QUERY = re.compile(
     r"nursultan|wexside|expensive|minced|delta\s*client|celestial|zenith|"
     r"vape|doomsday|meteor|liquidbounce|wurst|aristois|fdp|novoline|"
     r"чит\s*клиент|клиент\s*чит|скачать\s*чит|minecraft\s*чит|ghost\s*client|"
-    r"hack\s*client|killaura|инжект|javaagent|thunderhack|bleachhack",
+    r"hack\s*client|killaura|инжект|javaagent|thunderhack|bleachhack|"
+    r"chameleon|faker|второй.?пк|dual.?pc|обход.?ss|ss.?bypass|clean.?pc",
     re.I,
 )
 
