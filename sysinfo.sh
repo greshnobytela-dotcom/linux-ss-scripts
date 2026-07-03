@@ -99,7 +99,7 @@ if [[ -n "$vendor" || -n "$product" ]]; then
     case "${vendor}${product}${board}" in
       *[Vv][Mm]ware*|*VMware*)          virt="VM (VMware)" ;;
       *VirtualBox*|*innotek*)           virt="VM (VirtualBox)" ;;
-      *QEMU*|*KVM*|*Bochs*|*Standard PC*) virt="VM (QEMU/KVM)" ;;
+      *QEMU*|*KVM*|*Bochs*|*StandardPC*) virt="VM (QEMU/KVM)" ;;
       *Microsoft*Virtual*|*Hyper-V*)   virt="VM (Hyper-V)" ;;
       *Xen*)                            virt="VM (Xen)" ;;
       *Parallels*)                       virt="VM (Parallels)" ;;
