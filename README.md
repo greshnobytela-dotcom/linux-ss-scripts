@@ -51,7 +51,7 @@ curl -fsSL $BASE/run.sh | bash -s -- downloads
 | `browser-history.sh` | URL/IP читов в браузере |
 | `all-downloads.sh` | Таблица всех скачиваний |
 | `linux-artifacts.sh` | Службы Linux: journald, syslog, auditd, logind, cron |
-| `safe-mod-detector.sh` | Сессии MC: старт, стоп, перерывы |
+| `safe-mod-detector.sh` | Сессии MC: старт, стоп, статус |
 | `sysinfo.sh` | Дистрибутив, VM, дата установки |
 | `common-dirs-scan.sh` | Jar в типичных папках |
 | `memory-search.sh` | gcore/strings обёртка |
