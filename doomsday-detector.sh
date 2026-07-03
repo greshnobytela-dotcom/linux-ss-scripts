@@ -14,9 +14,22 @@ report() {
 }
 
 echo "{ Поиск по имени }"
-while IFS= read -r p; do
-  [[ -n "$p" ]] && report "файл: $p"
-done < <(find "$HOME" -maxdepth 5 -iname '*doomsday*' 2>/dev/null)
+SEARCH_DIRS=(
+  "$HOME/.minecraft"
+  "$HOME/Downloads" "$HOME/Загрузки"
+  "$HOME/Desktop" "$HOME/Рабочий стол"
+  "$HOME/.cache" "$HOME/.local/share"
+  "/tmp"
+)
+for dir in "${SEARCH_DIRS[@]}"; do
+  [[ -d "$dir" ]] || continue
+  while IFS= read -r p; do
+    [[ -z "$p" ]] && continue
+    base=$(basename "$p")
+    [[ "$base" =~ [Dd]etector|[Ss]cript|[Pp]latforms ]] && continue
+    report "файл: $p"
+  done < <(find "$dir" -maxdepth 4 -iname '*doomsday*' 2>/dev/null)
+done
 
 echo "{ History }"
 if grep -qi 'doomsday' "$HOME/.bash_history" 2>/dev/null; then
