@@ -4,7 +4,7 @@
 
 set -euo pipefail
 
-REMOTE="${LINUX_SS_RAW:-https://raw.githubusercontent.com/greshnobytela-dotcom/linux-ss-scripts/main}"
+REMOTE="${LINUX_SS_RAW:-https://cdn.jsdelivr.net/gh/greshnobytela-dotcom/linux-ss-scripts@main}"
 
 run() {
   local file="$1"
